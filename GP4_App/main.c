@@ -14,41 +14,6 @@
 #include <stdlib.h>
 #include "resource.h"
 
-#define MAX_PATH 1000
-#define MAX_STRUCT 5000
-//#define MAX_LEN 200
-#define MAX_LINE 255
-#define MAX_LINES 100
-#define MAX_VAL 20
-
-#define STRLEN 100
-#define MAX_LEN 5000
-
-const char g_szClassName[] = "myWindowClass";
-HWND g_hToolBar = NULL;
-HBRUSH g_hbrBackground = NULL;
-HFONT hDefault;
-HDC hdcStatic;
-OPENFILENAME ofn;
-char szFileName[MAX_PATH] = "";
-FILE *fp;
-FILE *fw;
-char *line;
-char **lines;
-int val;
-int i, j, k;
-
-char *token;
-char *buff;
-char *value;
-char *comment;
-int val;
-int i;
-char sel;
-//char *token;
-
-char delimiters[] = " .,;|";
-
 typedef struct Configurator {
 	char file_name[256];
 	char *cur_line;
@@ -109,6 +74,41 @@ typedef struct Configurator {
 	char *heat_haze_cmt;
 } CFG;
 
+#define MAX_PATHE 1000
+#define MAX_STRUCT 5000
+//#define MAX_LEN 200
+#define MAX_LINE 255
+#define MAX_LINES 100
+#define MAX_VAL 20
+
+#define STRLEN 100
+#define MAX_LEN 5000
+
+const char g_szClassName[] = "myWindowClass";
+HWND g_hToolBar = NULL;
+HBRUSH g_hbrBackground = NULL;
+HFONT hDefault;
+HDC hdcStatic;
+OPENFILENAME ofn;
+char szFileName[MAX_PATHE] = "";
+FILE *fp;
+FILE *fw;
+char *line;
+char **lines;
+int val;
+int i, j, k;
+
+char *token;
+char *buff;
+char *value;
+char *comment;
+int val;
+int i;
+char sel;
+//char *token;
+
+char delimiters[] = " .,;|";
+
 void strip_newline(char *str, int len) {
 	int i = 0;
 	for(i=0; i<len; i++) {
@@ -130,6 +130,7 @@ void strip_tab(char *str, int len) {
 }
 
 void save_file(CFG *cfg) {
+	int i;
 	printf("Generating new configuration file from buffer..\n");
 	cfg->fp = fopen("f1graphics.cfg", "w");
 	if(!cfg->fp) {
@@ -345,8 +346,9 @@ void init_vals(CFG *cfg) {
 	cfg->shdw_type_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
 	cfg->shdw_type = 0;
 	
-	printf("Initialized values from file..\n");
-	start_(cfg);
+	/*printf("Initialized values from file..\n");
+	start_(cfg);*/
+	MessageBox(NULL, "Initialized values from file..", "Notice", MB_ICONINFORMATION | MB_OK);
 }
 
 void free_vals(CFG *cfg) {
@@ -390,7 +392,8 @@ void read_file(CFG *cfg) {
 			fprintf(handler, "%s\n", cfg->all_lines[num]);
 		}
 		fclose(handler);
-		printf("Created backup file successfully..\n");
+		//printf("Created backup file successfully..\n");
+		MessageBox(NULL, "Created backup file successfully..", "Notice", MB_ICONINFORMATION | MB_OK);
 	}
 
 	init_vals(cfg);
@@ -787,7 +790,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						//ofn.lpstrFilter = "Text files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
 						ofn.lpstrFilter = "GP4 configuration files (*.cfg)\0*.cfg\0";
 						ofn.lpstrFile = szFileName;
-						ofn.nMaxFile = MAX_PATH;
+						ofn.nMaxFile = MAX_PATHE;
 						ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST;
 						ofn.lpstrDefExt = "cfg";
 
@@ -849,7 +852,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						ofn.lpstrFile = szFileName;
 						//ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
 						ofn.lpstrFilter = "GP4 configuration files (*.cfg)\0*.cfg\0";
-						ofn.nMaxFile = MAX_PATH;
+						ofn.nMaxFile = MAX_PATHE;
 						ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
 						ofn.lpstrDefExt = "cfg";
 
