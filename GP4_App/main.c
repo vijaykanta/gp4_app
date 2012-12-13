@@ -106,6 +106,14 @@ int val;
 int i;
 char sel;
 //char *token;
+char text[15];
+
+int texfilq = 0;
+int trkmp = 0;
+int envmp = 0;
+int texq = 0;
+int mxanfil = 1;
+int shdwt = 0;
 
 char delimiters[] = " .,;|";
 
@@ -169,6 +177,7 @@ void get_val_cmt_(CFG *cfg) {
 	comment = (char *) malloc(sizeof(char) * MAX_LINE);
 	
 	strcpy(buff, cfg->all_lines[cfg->cur_sel]);
+	//MessageBox(NULL, buff, "New line", MB_OK);
 	token = strtok(buff, ";");
 
 	if(token != NULL) {
@@ -211,7 +220,7 @@ void show_cur_val(CFG *cfg) {
 	printf("%s\n", comment);
 }
 
-void start_(CFG *cfg) {
+/*void start_(CFG *cfg) {
 	printf("\nType 't' to edit Texture Filter Quality\n");
 	printf("Type 'm' to edit Track Map\n");
 	printf("Type 'v' to edit Environment Map\n");
@@ -319,32 +328,57 @@ void start_(CFG *cfg) {
 		getchar();
 		start_(cfg);
 	}
-}
+}*/
 
 void init_vals(CFG *cfg) {
 	cfg->tex_fil_qlty_key = 98;
+	cfg->cur_sel = cfg->tex_fil_qlty_key;
+	get_val_cmt_(cfg);
 	cfg->tex_fil_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->tex_fil_qlty = 0;
+	cfg->tex_fil_qlty = (int) value;
+	strcpy(cfg->tex_fil_qlty_cmt, comment);
+	set_val_cmt_(cfg);
 	
-	cfg->track_map_key = 54;
+	cfg->track_map_key = 52;
+	cfg->cur_sel = cfg->track_map_key;
+	get_val_cmt_(cfg);
 	cfg->track_map_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->track_map = 0;
+	cfg->track_map = (int) value;
+	strcpy(cfg->track_map_cmt, comment);
+	set_val_cmt_(cfg);
 
 	cfg->env_map_key = 64;
+	cfg->cur_sel = cfg->env_map_key;
+	get_val_cmt_(cfg);
 	cfg->env_map_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->env_map = 0;
+	cfg->env_map = (int) value;
+	strcpy(cfg->env_map_cmt, comment);
+	set_val_cmt_(cfg);
 
 	cfg->tex_qlty_key = 23;
+	cfg->cur_sel = cfg->tex_qlty_key;
+	get_val_cmt_(cfg);
 	cfg->tex_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->tex_qlty = 0;
+	cfg->tex_qlty = (int) value;
+	strcpy(cfg->tex_qlty_cmt, comment);
+	set_val_cmt_(cfg);
 
 	cfg->an_fil_qlty_key = 100;
+	cfg->cur_sel = cfg->an_fil_qlty_key;
+	get_val_cmt_(cfg);
 	cfg->an_fil_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->an_fil_qlty = 0;
+	cfg->an_fil_qlty = (int) value;
+	strcpy(cfg->an_fil_qlty_cmt, comment);
+	set_val_cmt_(cfg);
 
 	cfg->shdw_type_key = 108;
+	cfg->cur_sel = cfg->shdw_type_key;
+	get_val_cmt_(cfg);
 	cfg->shdw_type_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->shdw_type = 0;
+	cfg->shdw_type = atoi(value);
+
+	strcpy(cfg->shdw_type_cmt, comment);
+	set_val_cmt_(cfg);
 	
 	/*printf("Initialized values from file..\n");
 	start_(cfg);*/
@@ -512,7 +546,7 @@ HWND CreateMainWnd(HINSTANCE *hInstance, const char *className, char *wndName, i
 						WS_EX_CLIENTEDGE,
 						className,
 						wndName,
-						WS_OVERLAPPEDWINDOW,
+						WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX,
 						CW_USEDEFAULT, CW_USEDEFAULT, w, h,
 						NULL, NULL, *hInstance, NULL);
 	if(hwnd == NULL) {
@@ -635,7 +669,20 @@ BOOL file_exists(char *filename) {
 }
 
 HWND hLabel, hTexLbl, hTexture, hBMLbl, hBumpMap, hShdLbl, hShadows, hHHLbl, hHeatHaze, hDtlLbl, hDetail, hFrmLbl, hFrames, hEdit;
+HWND hTexFilQ, hTrkMp, hEnvMp, hTexQ, hMxAnFil, hShdwT;
+HWND hTexFilQLbl, hTrkMpLbl, hEnvMpLbl, hTexQLbl, hMxAnFilLbl, hShdwTLbl;
+
 HWND hUButton, hDButton, hLButton;
+CFG cfg;
+
+void PreloadSettings(CFG *cfg) {
+	SendMessage(hTexFilQ, CB_SETCURSEL, cfg->tex_fil_qlty, 0);
+	SendMessage(hTrkMp, CB_SETCURSEL, cfg->track_map, 0);
+	SendMessage(hEnvMp, CB_SETCURSEL, cfg->env_map, 0);
+	SendMessage(hTexQ, CB_SETCURSEL, cfg->tex_qlty, 0);
+	SendMessage(hMxAnFil, CB_SETCURSEL, cfg->an_fil_qlty, 0);
+	SendMessage(hShdwT, CB_SETCURSEL, cfg->shdw_type, 0);
+}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch(msg) {
@@ -651,86 +698,96 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hLabel, &hDefault);
 			}
 			{
-				hTexLbl = CreateWndLabel(hwnd, "Texture rendering", 10, 40, 200, 20, IDC_TEXLBL);
-				if(!hTexLbl) return 0;
-				SetFont(&hTexLbl, &hDefault);
+				hTexFilQLbl = CreateWndLabel(hwnd, "Texture Filter Quality", 10, 40, 200, 20, IDC_TEXFILQLBL);
+				if(!hTexFilQLbl) return 0;
+				SetFont(&hTexFilQLbl, &hDefault);
 			}
 			{
-				hTexture = CreateWndCombo(hwnd, "", 10, 60, 200, 500, IDC_TEXTURES);
-				if(!hTexture) return 0;
-				SetFont(&hTexture, &hDefault);
-				SendMessage(hTexture, CB_ADDSTRING, 0, (LPARAM) "Ultra quality");
-				SendMessage(hTexture, CB_ADDSTRING, 2, (LPARAM) "High quality");
-				SendMessage(hTexture, CB_ADDSTRING, 4, (LPARAM) "Medium quality");
-				SendMessage(hTexture, CB_ADDSTRING, 8, (LPARAM) "Low quality");
-				SendMessage(hTexture, CB_SETCURSEL, 0, 0);
+				hTexFilQ = CreateWndCombo(hwnd, "", 10, 60, 200, 500, IDC_TEXFILQ);
+				if(!hTexFilQ) return 0;
+				SetFont(&hTexFilQ, &hDefault);
+				SendMessage(hTexFilQ, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendMessage(hTexFilQ, CB_ADDSTRING, 1, (LPARAM) "Point");
+				SendMessage(hTexFilQ, CB_ADDSTRING, 2, (LPARAM) "Bilinear");
+				SendMessage(hTexFilQ, CB_ADDSTRING, 3, (LPARAM) "Anisotropic");
+				SendMessage(hTexFilQ, CB_ADDSTRING, 4, (LPARAM) "Flat Cubic");
+				SendMessage(hTexFilQ, CB_ADDSTRING, 5, (LPARAM) "Gaussian Cubic");
+				SendMessage(hTexFilQ, CB_SETCURSEL, 0, 0);
 			}
 			{
-				hBMLbl = CreateWndLabel(hwnd, "Bump mapping", 240, 40, 200, 20, IDC_BMLBL);
-				if(!hBMLbl) return 0;
-				SetFont(&hBMLbl, &hDefault);
+				hTrkMpLbl = CreateWndLabel(hwnd, "Track Map", 240, 40, 200, 20, IDC_TRKMPLBL);
+				if(!hTrkMpLbl) return 0;
+				SetFont(&hTrkMpLbl, &hDefault);
 			}
 			{
-				hBumpMap = CreateWndCombo(hwnd, "", 240, 60, 200, 500, IDC_BUMPMAP);
-				if(!hBumpMap) return 0;
-				SetFont(&hBumpMap, &hDefault);
-				SendMessage(hBumpMap, CB_ADDSTRING, 1, (LPARAM) "Premium Level");
-				SendMessage(hBumpMap, CB_ADDSTRING, 0, (LPARAM) "Disable");
-				SendMessage(hBumpMap, CB_SETCURSEL, 0, 1);
+				hTrkMp = CreateWndCombo(hwnd, "", 240, 60, 200, 500, IDC_TRKMP);
+				if(!hTrkMp) return 0;
+				SetFont(&hTrkMp, &hDefault);
+				SendMessage(hTrkMp, CB_ADDSTRING, 0, (LPARAM) "Off");
+				SendMessage(hTrkMp, CB_ADDSTRING, 1, (LPARAM) "Arcade Only");
+				SendMessage(hTrkMp, CB_ADDSTRING, 2, (LPARAM) "All non trackside");
+				SendMessage(hTrkMp, CB_SETCURSEL, 0, 0);
 			}
 			{
-				hShdLbl = CreateWndLabel(hwnd, "Shadows type", 470, 40, 200, 20, IDC_SHDLBL);
-				if(!hShdLbl) return 0;
-				SetFont(&hShdLbl, &hDefault);
+				hEnvMpLbl = CreateWndLabel(hwnd, "Environment Map", 470, 40, 200, 20, IDC_ENVMPLBL);
+				if(!hEnvMpLbl) return 0;
+				SetFont(&hEnvMpLbl, &hDefault);
 			}
 			{
-				hShadows = CreateWndCombo(hwnd, "", 470, 60, 200, 500, IDC_SHADOWS);
-				if(!hShadows) return 0;
-				SetFont(&hShadows, &hDefault);
-				SendMessage(hShadows, CB_ADDSTRING, 1, (LPARAM) "Static");
-				SendMessage(hShadows, CB_ADDSTRING, 2, (LPARAM) "Composite");
-				SendMessage(hShadows, CB_ADDSTRING, 3, (LPARAM) "Projected");
-				SendMessage(hShadows, CB_ADDSTRING, 0, (LPARAM) "Disable");
-				SendMessage(hShadows, CB_SETCURSEL, 0, 1);
+				hEnvMp = CreateWndCombo(hwnd, "", 470, 60, 200, 500, IDC_ENVMP);
+				if(!hEnvMp) return 0;
+				SetFont(&hEnvMp, &hDefault);
+				SendMessage(hEnvMp, CB_ADDSTRING, 0, (LPARAM) "Default");
+				SendMessage(hEnvMp, CB_ADDSTRING, 1, (LPARAM) "Extra");
+				SendMessage(hEnvMp, CB_SETCURSEL, 0, 0);
 			}
 			{
-				hHHLbl = CreateWndLabel(hwnd, "Heat haze", 10, 120, 200, 20, IDC_HHLBL);
-				if(!hHHLbl) return 0;
-				SetFont(&hHHLbl, &hDefault);
+				hTexQLbl = CreateWndLabel(hwnd, "Texture Quality", 10, 120, 200, 20, IDC_TEXQLBL);
+				if(!hTexQLbl) return 0;
+				SetFont(&hTexQLbl, &hDefault);
 			}
 			{
-				hHeatHaze = CreateWndCombo(hwnd, "", 10, 140, 200, 500, IDC_HEATHAZE);
-				if(!hHeatHaze) return 0;
-				SetFont(&hHeatHaze, &hDefault);
-				SendMessage(hHeatHaze, CB_ADDSTRING, 1, (LPARAM) "Enable");
-				SendMessage(hHeatHaze, CB_ADDSTRING, 0, (LPARAM) "Disable");
-				SendMessage(hHeatHaze, CB_SETCURSEL, 0, 1);
+				hTexQ = CreateWndCombo(hwnd, "", 10, 140, 200, 500, IDC_TEXQ);
+				if(!hTexQ) return 0;
+				SetFont(&hTexQ, &hDefault);
+				SendMessage(hTexQ, CB_ADDSTRING, 0, (LPARAM) "MAX");
+				SendMessage(hTexQ, CB_ADDSTRING, 2, (LPARAM) "HALF");
+				SendMessage(hTexQ, CB_ADDSTRING, 4, (LPARAM) "QTR");
+				SendMessage(hTexQ, CB_ADDSTRING, 8, (LPARAM) "EIGTH");
+				SendMessage(hTexQ, CB_SETCURSEL, 0, 0);
 			}
 			{
-				hDtlLbl = CreateWndLabel(hwnd, "Advanced car shaders", 240, 120, 200, 20, IDC_DTLLBL);
-				if(!hDtlLbl) return 0;
-				SetFont(&hDtlLbl, &hDefault);
+				hMxAnFilLbl = CreateWndLabel(hwnd, "Max Anisotropic Filter (1-7)", 240, 120, 200, 20, IDC_MXANFILLBL);
+				if(!hMxAnFilLbl) return 0;
+				SetFont(&hMxAnFilLbl, &hDefault);
 			}
 			{
-				hDetail = CreateWndCombo(hwnd, "", 240, 140, 200, 500, IDC_DETAIL);
-				if(!hDetail) return 0;
-				SetFont(&hDetail, &hDefault);
-				SendMessage(hDetail, CB_ADDSTRING, 1, (LPARAM) "Enable");
-				SendMessage(hDetail, CB_ADDSTRING, 0, (LPARAM) "Disable");
-				SendMessage(hDetail, CB_SETCURSEL, 0, 1);
+				hMxAnFil = CreateWndCombo(hwnd, "", 240, 140, 200, 500, IDC_MXANFIL);
+				if(!hMxAnFil) return 0;
+				SetFont(&hMxAnFil, &hDefault);
+				SendMessage(hMxAnFil, CB_ADDSTRING, 1, (LPARAM) "Off");
+				SendMessage(hMxAnFil, CB_ADDSTRING, 2, (LPARAM) "2");
+				SendMessage(hMxAnFil, CB_ADDSTRING, 3, (LPARAM) "3");
+				SendMessage(hMxAnFil, CB_ADDSTRING, 4, (LPARAM) "4");
+				SendMessage(hMxAnFil, CB_ADDSTRING, 5, (LPARAM) "5");
+				SendMessage(hMxAnFil, CB_ADDSTRING, 6, (LPARAM) "6");
+				SendMessage(hMxAnFil, CB_ADDSTRING, 7, (LPARAM) "7");
+				SendMessage(hMxAnFil, CB_SETCURSEL, 0, 0);
 			}
 			{
-				hFrmLbl = CreateWndLabel(hwnd, "Brake glows", 470, 120, 200, 20, IDC_FRMLBL);
-				if(!hFrmLbl) return 0;
-				SetFont(&hFrmLbl, &hDefault);
+				hShdwTLbl = CreateWndLabel(hwnd, "Shadow Type", 470, 120, 200, 20, IDC_SHDWTLBL);
+				if(!hShdwTLbl) return 0;
+				SetFont(&hShdwTLbl, &hDefault);
 			}
 			{
-				hFrames = CreateWndCombo(hwnd, "", 470, 140, 200, 500, IDC_FRAMES);
-				if(!hFrames) return 0;
-				SetFont(&hFrames, &hDefault);
-				SendMessage(hFrames, CB_ADDSTRING, 1, (LPARAM) "On");
-				SendMessage(hFrames, CB_ADDSTRING, 0, (LPARAM) "Off");
-				SendMessage(hFrames, CB_SETCURSEL, 0, 1);
+				hShdwT = CreateWndCombo(hwnd, "", 470, 140, 200, 500, IDC_SHDWT);
+				if(!hShdwT) return 0;
+				SetFont(&hShdwT, &hDefault);
+				SendMessage(hShdwT, CB_ADDSTRING, 0, (LPARAM) "Off");
+				SendMessage(hShdwT, CB_ADDSTRING, 1, (LPARAM) "Static");
+				SendMessage(hShdwT, CB_ADDSTRING, 2, (LPARAM) "Composite");
+				SendMessage(hShdwT, CB_ADDSTRING, 3, (LPARAM) "Projected");
+				SendMessage(hShdwT, CB_SETCURSEL, 0, 0);
 			}
 			{
 				hUButton = CreateWndButton(hwnd, "Update", 10, 190, 60, 25, IDC_UPDBTN);
@@ -781,6 +838,64 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						}
 					}
 					break;
+				case IDC_TEXFILQ:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								//cfg.cur_sel = cfg.tex_fil_qlty_key;
+								//cfg.tex_fil_qlty = SendMessage(hTexFilQ, CB_GETCURSEL, 0, 0);
+								// TODO CODE
+								//sprintf(text, "%d", cfg.tex_fil_qlty);
+								//MessageBox(hwnd, text, "Selection", MB_OK);
+								texfilq = SendMessage(hTexFilQ, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_TRKMP:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								trkmp = SendMessage(hTrkMp, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_ENVMP:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								envmp = SendMessage(hEnvMp, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_TEXQ:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								texq = SendMessage(hTexQ, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+				case IDC_MXANFIL:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								mxanfil = SendMessage(hMxAnFil, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_SHDWT:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								shdwt = SendMessage(hShdwT, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
 				case IDC_LBTN:
 					{
 						ZeroMemory(&ofn, sizeof(ofn));
@@ -800,7 +915,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 								return 0;
 							}
 							if(file_exists(szFileName)) {
-								CFG cfg;
 								memset(cfg.file_name, 0, 256);
 								strcpy(cfg.file_name, szFileName);
 								//fp = fopen(szFileName, "r");
@@ -808,6 +922,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 								if(cfg.fp) {
 									//printf("Loading from location: %s\n", cfg.file_name);
 									read_file(&cfg);
+									PreloadSettings(&cfg);
 								} else {
 									//printf("Error reading file!\n");
 									MessageBox(hwnd, "Cannot read file!", szFileName, MB_ICONERROR | MB_OK);
@@ -845,7 +960,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						GetDlgItemText(hwnd, IDC_TEXTURES, buf, 5);
 						MessageBox(hwnd, buf, "Notice", MB_OK);*/
 						
-						ZeroMemory(&ofn, sizeof(ofn));
+						/*ZeroMemory(&ofn, sizeof(ofn));
 
 						ofn.lStructSize = sizeof(ofn);
 						ofn.hwndOwner = hwnd;
@@ -867,7 +982,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							} else {
 								MessageBox(hwnd, "Cannot write to file!", szFileName, MB_ICONERROR | MB_OK);
 							}
-						}
+						}*/
+						cfg.tex_fil_qlty = texfilq;
+						cfg.track_map = trkmp;
+						cfg.env_map = envmp;
+						cfg.tex_qlty = texq;
+						cfg.an_fil_qlty = mxanfil;
+						cfg.shdw_type = shdwt;
+						MessageBox(hwnd, "New values updated to buffer..", "Notice", MB_ICONINFORMATION | MB_OK);
 					}
 					break;
 				case ID_FILE_EXIT:
