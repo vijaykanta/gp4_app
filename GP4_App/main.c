@@ -97,6 +97,8 @@ char *line;
 char **lines;
 int val;
 int i, j, k;
+int file_read = 0;
+int update_buffer = 0;
 
 char *token;
 char *buff;
@@ -213,6 +215,7 @@ void set_val_cmt_(CFG *cfg) {
 
 	last = strlen(cfg->all_lines[cfg->cur_sel]) + 1;
 	cfg->all_lines[cfg->cur_sel][last] = '\0';
+	MessageBox(NULL, value, comment, MB_OK);
 }
 
 void show_cur_val(CFG *cfg) {
@@ -335,7 +338,7 @@ void init_vals(CFG *cfg) {
 	cfg->cur_sel = cfg->tex_fil_qlty_key;
 	get_val_cmt_(cfg);
 	cfg->tex_fil_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->tex_fil_qlty = (int) value;
+	cfg->tex_fil_qlty = atoi(value);
 	strcpy(cfg->tex_fil_qlty_cmt, comment);
 	set_val_cmt_(cfg);
 	
@@ -343,7 +346,7 @@ void init_vals(CFG *cfg) {
 	cfg->cur_sel = cfg->track_map_key;
 	get_val_cmt_(cfg);
 	cfg->track_map_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->track_map = (int) value;
+	cfg->track_map = atoi(value);
 	strcpy(cfg->track_map_cmt, comment);
 	set_val_cmt_(cfg);
 
@@ -351,7 +354,7 @@ void init_vals(CFG *cfg) {
 	cfg->cur_sel = cfg->env_map_key;
 	get_val_cmt_(cfg);
 	cfg->env_map_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->env_map = (int) value;
+	cfg->env_map = atoi(value);
 	strcpy(cfg->env_map_cmt, comment);
 	set_val_cmt_(cfg);
 
@@ -359,7 +362,7 @@ void init_vals(CFG *cfg) {
 	cfg->cur_sel = cfg->tex_qlty_key;
 	get_val_cmt_(cfg);
 	cfg->tex_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->tex_qlty = (int) value;
+	cfg->tex_qlty = atoi(value);
 	strcpy(cfg->tex_qlty_cmt, comment);
 	set_val_cmt_(cfg);
 
@@ -367,7 +370,7 @@ void init_vals(CFG *cfg) {
 	cfg->cur_sel = cfg->an_fil_qlty_key;
 	get_val_cmt_(cfg);
 	cfg->an_fil_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->an_fil_qlty = (int) value;
+	cfg->an_fil_qlty = atoi(value);
 	strcpy(cfg->an_fil_qlty_cmt, comment);
 	set_val_cmt_(cfg);
 
@@ -429,7 +432,7 @@ void read_file(CFG *cfg) {
 		//printf("Created backup file successfully..\n");
 		MessageBox(NULL, "Created backup file successfully..", "Notice", MB_ICONINFORMATION | MB_OK);
 	}
-
+	file_read = 1;
 	init_vals(cfg);
 }	
 
@@ -671,17 +674,39 @@ BOOL file_exists(char *filename) {
 HWND hLabel, hTexLbl, hTexture, hBMLbl, hBumpMap, hShdLbl, hShadows, hHHLbl, hHeatHaze, hDtlLbl, hDetail, hFrmLbl, hFrames, hEdit;
 HWND hTexFilQ, hTrkMp, hEnvMp, hTexQ, hMxAnFil, hShdwT;
 HWND hTexFilQLbl, hTrkMpLbl, hEnvMpLbl, hTexQLbl, hMxAnFilLbl, hShdwTLbl;
+HWND hFileGenBtn;
 
 HWND hUButton, hDButton, hLButton;
 CFG cfg;
 
 void PreloadSettings(CFG *cfg) {
 	SendMessage(hTexFilQ, CB_SETCURSEL, cfg->tex_fil_qlty, 0);
+	texfilq = cfg->tex_fil_qlty;
 	SendMessage(hTrkMp, CB_SETCURSEL, cfg->track_map, 0);
+	trkmp = cfg->track_map;
 	SendMessage(hEnvMp, CB_SETCURSEL, cfg->env_map, 0);
+	envmp = cfg->env_map;
 	SendMessage(hTexQ, CB_SETCURSEL, cfg->tex_qlty, 0);
+	texq = cfg->tex_qlty;
 	SendMessage(hMxAnFil, CB_SETCURSEL, cfg->an_fil_qlty, 0);
+	mxanfil = cfg->an_fil_qlty;
 	SendMessage(hShdwT, CB_SETCURSEL, cfg->shdw_type, 0);
+	shdwt = cfg->shdw_type;
+}
+
+void ResetToDefaults(CFG *cfg) {
+	texfilq = 0;
+	trkmp = 0;
+	envmp = 0;
+	texq = 0;
+	mxanfil = 1;
+	shdwt = 0;
+	SendMessage(hTexFilQ, CB_SETCURSEL, 0, 0);
+	SendMessage(hTrkMp, CB_SETCURSEL, 0, 0);
+	SendMessage(hEnvMp, CB_SETCURSEL, 0, 0);
+	SendMessage(hTexQ, CB_SETCURSEL, 0, 0);
+	SendMessage(hMxAnFil, CB_SETCURSEL, 0, 0);
+	SendMessage(hShdwT, CB_SETCURSEL, 0, 0);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -802,8 +827,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hLButton, &hDefault);
 			}
 			{
+				hFileGenBtn = CreateWndButton(hwnd, "Generate Configuration File", 510, 190, 160, 25, IDC_FILEGENBTN);
+				SetFont(&hFileGenBtn, &hDefault);
+			}
+			{
 				hEdit = CreateWndEdit(hwnd, "", 0, 250, 100, 100, IDC_FEDIT);
 				SetFont(&hEdit, &hDefault);
+				EnableWindow(hEdit, FALSE);
 			}
 			break;
 		case WM_SIZE:
@@ -896,6 +926,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						}
 					}
 					break;
+				case IDC_DEFBTN:
+					{
+						ResetToDefaults(&cfg);
+						MessageBox(hwnd, "Values set to default!", "Notice", MB_ICONINFORMATION | MB_OK);
+					}
+					break;
 				case IDC_LBTN:
 					{
 						ZeroMemory(&ofn, sizeof(ofn));
@@ -960,36 +996,70 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						GetDlgItemText(hwnd, IDC_TEXTURES, buf, 5);
 						MessageBox(hwnd, buf, "Notice", MB_OK);*/
 						
-						/*ZeroMemory(&ofn, sizeof(ofn));
-
-						ofn.lStructSize = sizeof(ofn);
-						ofn.hwndOwner = hwnd;
-						ofn.lpstrFile = szFileName;
-						//ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
-						ofn.lpstrFilter = "GP4 configuration files (*.cfg)\0*.cfg\0";
-						ofn.nMaxFile = MAX_PATHE;
-						ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-						ofn.lpstrDefExt = "cfg";
-
-						if(GetSaveFileName(&ofn)) {
-							fw = fopen(szFileName, "w");
-							if(fw) {
-								//fprintf(fw, "i is %d and j is %d\n", i, j);
-								for(i=0; i<j; i++) {
-									fprintf(fw, "%s\n", lines[i]);
-								}
-								fclose(fw);
-							} else {
-								MessageBox(hwnd, "Cannot write to file!", szFileName, MB_ICONERROR | MB_OK);
-							}
-						}*/
+						
 						cfg.tex_fil_qlty = texfilq;
+						cfg.cur_sel = cfg.tex_fil_qlty_key;
+						set_val_cmt_(&cfg);
+
 						cfg.track_map = trkmp;
+						cfg.cur_sel = cfg.track_map_key;
+						set_val_cmt_(&cfg);
+
 						cfg.env_map = envmp;
+						cfg.cur_sel = cfg.env_map_key;
+						set_val_cmt_(&cfg);
+
 						cfg.tex_qlty = texq;
+						cfg.cur_sel = cfg.tex_qlty_key;
+						set_val_cmt_(&cfg);
+
 						cfg.an_fil_qlty = mxanfil;
+						cfg.cur_sel = cfg.an_fil_qlty_key;
+						set_val_cmt_(&cfg);
+
 						cfg.shdw_type = shdwt;
+						cfg.cur_sel = cfg.shdw_type_key;
+						set_val_cmt_(&cfg);
+
+						update_buffer = 1;
 						MessageBox(hwnd, "New values updated to buffer..", "Notice", MB_ICONINFORMATION | MB_OK);
+					}
+					break;
+				case IDC_FILEGENBTN:
+					{
+						if(file_read == 1) {
+							if(update_buffer == 1) {
+								update_buffer = 0;
+								ZeroMemory(&ofn, sizeof(ofn));
+
+								ofn.lStructSize = sizeof(ofn);
+								ofn.hwndOwner = hwnd;
+								ofn.lpstrFile = szFileName;
+								//ofn.lpstrFilter = "Text Files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+								ofn.lpstrFilter = "GP4 configuration files (*.cfg)\0*.cfg\0";
+								ofn.nMaxFile = MAX_PATHE;
+								ofn.Flags = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+								ofn.lpstrDefExt = "cfg";
+
+								if(GetSaveFileName(&ofn)) {
+									fw = fopen(szFileName, "w");
+									if(fw) {
+										//fprintf(fw, "i is %d and j is %d\n", i, j);
+										for(i=0; i<cfg.tot_lines; i++) {
+											fprintf(fw, "%s\n", cfg.all_lines[i]);
+										}
+										fclose(fw);
+
+									} else {
+										MessageBox(hwnd, "Cannot write to file!", szFileName, MB_ICONERROR | MB_OK);
+									}
+								}
+							} else {
+								MessageBox(hwnd, "You have yet to update buffer to create file!", "Notice", MB_ICONINFORMATION | MB_OK);
+							}
+						} else {
+							MessageBox(hwnd, "You did not load a config file!", "Error", MB_ICONERROR | MB_OK);
+						}
 					}
 					break;
 				case ID_FILE_EXIT:
