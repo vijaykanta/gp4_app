@@ -104,8 +104,6 @@ char *token;
 char *buff;
 char *value;
 char *comment;
-int val;
-int i;
 char sel;
 //char *token;
 char text[15];
@@ -116,6 +114,8 @@ int envmp = 0;
 int texq = 0;
 int mxanfil = 1;
 int shdwt = 0;
+
+HBITMAP g_hbmBall = NULL;
 
 char delimiters[] = " .,;|";
 
@@ -215,7 +215,7 @@ void set_val_cmt_(CFG *cfg) {
 
 	last = strlen(cfg->all_lines[cfg->cur_sel]) + 1;
 	cfg->all_lines[cfg->cur_sel][last] = '\0';
-	MessageBox(NULL, value, comment, MB_OK);
+	//MessageBox(NULL, value, comment, MB_OK);
 }
 
 void show_cur_val(CFG *cfg) {
@@ -336,11 +336,11 @@ void show_cur_val(CFG *cfg) {
 void init_vals(CFG *cfg) {
 	cfg->tex_fil_qlty_key = 98;
 	cfg->cur_sel = cfg->tex_fil_qlty_key;
-	get_val_cmt_(cfg);
+	get_val_cmt_(cfg); // Get from buffer
 	cfg->tex_fil_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
-	cfg->tex_fil_qlty = atoi(value);
-	strcpy(cfg->tex_fil_qlty_cmt, comment);
-	set_val_cmt_(cfg);
+	cfg->tex_fil_qlty = atoi(value); // Set independent value
+	strcpy(cfg->tex_fil_qlty_cmt, comment); // Set independent comment
+	//set_val_cmt_(cfg); // Set to buffer
 	
 	cfg->track_map_key = 52;
 	cfg->cur_sel = cfg->track_map_key;
@@ -348,7 +348,7 @@ void init_vals(CFG *cfg) {
 	cfg->track_map_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
 	cfg->track_map = atoi(value);
 	strcpy(cfg->track_map_cmt, comment);
-	set_val_cmt_(cfg);
+	//set_val_cmt_(cfg);
 
 	cfg->env_map_key = 64;
 	cfg->cur_sel = cfg->env_map_key;
@@ -356,7 +356,7 @@ void init_vals(CFG *cfg) {
 	cfg->env_map_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
 	cfg->env_map = atoi(value);
 	strcpy(cfg->env_map_cmt, comment);
-	set_val_cmt_(cfg);
+	//set_val_cmt_(cfg);
 
 	cfg->tex_qlty_key = 23;
 	cfg->cur_sel = cfg->tex_qlty_key;
@@ -364,7 +364,7 @@ void init_vals(CFG *cfg) {
 	cfg->tex_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
 	cfg->tex_qlty = atoi(value);
 	strcpy(cfg->tex_qlty_cmt, comment);
-	set_val_cmt_(cfg);
+	//set_val_cmt_(cfg);
 
 	cfg->an_fil_qlty_key = 100;
 	cfg->cur_sel = cfg->an_fil_qlty_key;
@@ -372,7 +372,7 @@ void init_vals(CFG *cfg) {
 	cfg->an_fil_qlty_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
 	cfg->an_fil_qlty = atoi(value);
 	strcpy(cfg->an_fil_qlty_cmt, comment);
-	set_val_cmt_(cfg);
+	//set_val_cmt_(cfg);
 
 	cfg->shdw_type_key = 108;
 	cfg->cur_sel = cfg->shdw_type_key;
@@ -381,7 +381,7 @@ void init_vals(CFG *cfg) {
 	cfg->shdw_type = atoi(value);
 
 	strcpy(cfg->shdw_type_cmt, comment);
-	set_val_cmt_(cfg);
+	//set_val_cmt_(cfg);
 	
 	/*printf("Initialized values from file..\n");
 	start_(cfg);*/
@@ -692,6 +692,7 @@ void PreloadSettings(CFG *cfg) {
 	mxanfil = cfg->an_fil_qlty;
 	SendMessage(hShdwT, CB_SETCURSEL, cfg->shdw_type, 0);
 	shdwt = cfg->shdw_type;
+	update_buffer = 0;
 }
 
 void ResetToDefaults(CFG *cfg) {
@@ -707,20 +708,27 @@ void ResetToDefaults(CFG *cfg) {
 	SendMessage(hTexQ, CB_SETCURSEL, 0, 0);
 	SendMessage(hMxAnFil, CB_SETCURSEL, 0, 0);
 	SendMessage(hShdwT, CB_SETCURSEL, 0, 0);
+	update_buffer = 0;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch(msg) {
 		case WM_CREATE:
 			{
+				g_hbmBall = LoadBitmap(GetModuleHandle(NULL), MAKEINTRESOURCE(IDB_MYBALL));
+				if(g_hbmBall == NULL) {
+					MessageBox(hwnd, "Failed to load bitmap!", "Error", MB_ICONEXCLAMATION | MB_OK);
+				}
+			}
+			{
 				hDefault = GetStockObject(DEFAULT_GUI_FONT);
 				g_hbrBackground = (HBRUSH) CreateSolidBrush(RGB(255, 255, 255));
 				strip_tab("Hello world\n", 20);
 			}
 			{
-				hLabel = CreateWndLabel(hwnd, "Grand Prix 4 graphics", 10, 10, 200, 20, IDC_LABEL);
+				/*hLabel = CreateWndLabel(hwnd, "Grand Prix 4 Configurator", 250, 10, 200, 20, IDC_LABEL);
 				if(!hLabel) return 0;
-				SetFont(&hLabel, &hDefault);
+				SetFont(&hLabel, &hDefault);*/
 			}
 			{
 				hTexFilQLbl = CreateWndLabel(hwnd, "Texture Filter Quality", 10, 40, 200, 20, IDC_TEXFILQLBL);
@@ -999,27 +1007,70 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						
 						cfg.tex_fil_qlty = texfilq;
 						cfg.cur_sel = cfg.tex_fil_qlty_key;
-						set_val_cmt_(&cfg);
+						
+						if(file_read == 1) {
+							val = cfg.tex_fil_qlty;
+							free(comment);
+							comment = (char *) malloc(sizeof(char) * MAX_LINE);
+							strcpy(comment, cfg.tex_fil_qlty_cmt);
+							set_val_cmt_(&cfg);
+						}
 
 						cfg.track_map = trkmp;
 						cfg.cur_sel = cfg.track_map_key;
-						set_val_cmt_(&cfg);
+						if(file_read == 1) {
+							val = cfg.track_map;
+							free(comment);
+							comment = (char *) malloc(sizeof(char) * MAX_LINE);
+							strcpy(comment, cfg.track_map_cmt);
+						
+							set_val_cmt_(&cfg);
+						}
 
 						cfg.env_map = envmp;
 						cfg.cur_sel = cfg.env_map_key;
-						set_val_cmt_(&cfg);
+						if(file_read == 1) {
+							val = cfg.env_map;
+							free(comment);
+							comment = (char *) malloc(sizeof(char) * MAX_LINE);
+							strcpy(comment, cfg.env_map_cmt);
+						
+							set_val_cmt_(&cfg);
+						}
 
 						cfg.tex_qlty = texq;
 						cfg.cur_sel = cfg.tex_qlty_key;
-						set_val_cmt_(&cfg);
+
+						if(file_read == 1) {
+							val = cfg.tex_qlty;
+							free(comment);
+							comment = (char *) malloc(sizeof(char) * MAX_LINE);
+							strcpy(comment, cfg.tex_fil_qlty_cmt);
+						
+							set_val_cmt_(&cfg);
+						}
 
 						cfg.an_fil_qlty = mxanfil;
 						cfg.cur_sel = cfg.an_fil_qlty_key;
-						set_val_cmt_(&cfg);
+						if(file_read == 1) {
+							val = cfg.an_fil_qlty;
+							free(comment);
+							comment = (char *) malloc(sizeof(char) * MAX_LINE);
+							strcpy(comment, cfg.an_fil_qlty_cmt);
+						
+							set_val_cmt_(&cfg);
+						}
 
 						cfg.shdw_type = shdwt;
 						cfg.cur_sel = cfg.shdw_type_key;
-						set_val_cmt_(&cfg);
+						if(file_read == 1) {
+							val = cfg.shdw_type;
+							free(comment);
+							comment = (char *) malloc(sizeof(char) * MAX_LINE);
+							strcpy(comment, cfg.shdw_type_cmt);
+						
+							set_val_cmt_(&cfg);
+						}
 
 						update_buffer = 1;
 						MessageBox(hwnd, "New values updated to buffer..", "Notice", MB_ICONINFORMATION | MB_OK);
@@ -1084,6 +1135,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				return (LONG) g_hbrBackground;
 			}
 			break;
+		case WM_PAINT:
+			{
+				BITMAP bm;
+				PAINTSTRUCT ps;
+
+				HDC hdc = BeginPaint(hwnd, &ps);
+
+				HDC hdcMem = CreateCompatibleDC(hdc);
+				HBITMAP hbmOld = SelectObject(hdcMem, g_hbmBall);
+
+				GetObject(g_hbmBall, sizeof(bm), &bm);
+				BitBlt(hdc, 570, 10, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+
+				SelectObject(hdcMem, hbmOld);
+				DeleteDC(hdcMem);
+
+				EndPaint(hwnd, &ps);
+			}
+			break;
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			DestroyWindow(g_hToolBar);
@@ -1093,6 +1163,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			}
 			break;
 		case WM_DESTROY:
+			DeleteObject(g_hbmBall);
 			PostQuitMessage(0);
 			break;
 		default:

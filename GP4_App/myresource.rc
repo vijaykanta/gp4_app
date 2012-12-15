@@ -10,23 +10,9 @@ BEGIN
 		MENUITEM "&Save", ID_FILE_SAVEAS
 		MENUITEM "E&xit", ID_FILE_EXIT
 	END
-	POPUP "&Edit"
-	BEGIN
-		MENUITEM "C&ut", 0, GRAYED
-		MENUITEM "&Paste", 0, GRAYED
-	END
 	POPUP "&Window"
 	BEGIN
-		MENUITEM "P&references", 0, GRAYED
-		POPUP "&Toolbar"
-		BEGIN
-			MENUITEM "&Show", IDT_SHOW
-			MENUITEM "&Hide", IDT_HIDE
-		END
-	END
-	POPUP "&Track"
-	BEGIN
-		MENUITEM "Pr&oject data", 0, GRAYED
+		MENUITEM "P&references", 0, GRAYED		
 	END
 	POPUP "&Help"
 	BEGIN
@@ -36,13 +22,13 @@ END
 
 IDD_ABOUT DIALOG DISCARDABLE 0, 0, 175, 90
 STYLE DS_MODALFRAME WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About GP4 Player"
+CAPTION "About GP4 Config"
 FONT 8, "MS Sans Serif"
 BEGIN
 	DEFPUSHBUTTON			"&OK", IDOK, 40, 58, 50, 15
 	PUSHBUTTON				"&Cancel", IDCANCEL, 0, 0, 0, 0
-	GROUPBOX				"About Grand Prix 4 Player", IDC_STATIC, 10, 10, 155, 70
-	CTEXT					"Grand Prix 4 Player is all about managing GP4 packages.",
+	GROUPBOX				"About Grand Prix 4 Configurator", IDC_STATIC, 10, 10, 155, 70
+	CTEXT					"Grand Prix 4 Configurator is a simple Windows app which lets you update internal settings of the game.",
 								IDC_STATIC, 20, 25, 120, 30
 END
 
@@ -55,4 +41,7 @@ BEGIN
 	PUSHBUTTON			"&Press", IDC_PRESS, 0, 0, 0, 0
 	PUSHBUTTON			"&Other", IDC_OTHER, 0, 0, 0, 0
 END
+
+IDB_MYBALL BITMAP "logo.bmp"
+
 
