@@ -676,6 +676,10 @@ HWND hTexFilQ, hTrkMp, hEnvMp, hTexQ, hMxAnFil, hShdwT;
 HWND hTexFilQLbl, hTrkMpLbl, hEnvMpLbl, hTexQLbl, hMxAnFilLbl, hShdwTLbl;
 HWND hFileGenBtn;
 
+/* Second set */
+HWND hHTNLLbl, hResWdLbl, hResHtLbl;
+HWND hHTNL, hResWd, hResHt;
+
 HWND hUButton, hDButton, hLButton;
 CFG cfg;
 
@@ -823,19 +827,49 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hShdwT, CB_SETCURSEL, 0, 0);
 			}
 			{
-				hUButton = CreateWndButton(hwnd, "Update", 10, 190, 60, 25, IDC_UPDBTN);
+				hHTNLLbl = CreateWndLabel(hwnd, "Hardware T&L", 10, 200, 200, 20, IDC_HTNLLBL);
+				if(!hHTNLLbl) return 0;
+				SetFont(&hHTNLLbl, &hDefault);
+			}
+			{
+				hHTNL = CreateWndCombo(hwnd, "", 10, 220, 200, 20, IDC_HTNL);
+				if(!hHTNL) return 0;
+				SetFont(&hHTNL, &hDefault);
+			}
+			{
+				hResWdLbl = CreateWndLabel(hwnd, "Resolution width", 240, 200, 200, 20, IDC_RESWDLBL);
+				if(!hResWdLbl) return 0;
+				SetFont(&hResWdLbl, &hDefault);
+			}
+			{
+				hResWd = CreateWndCombo(hwnd, "", 240, 220, 200, 20, IDC_RESWD);
+				if(!hResWd) return 0;
+				SetFont(&hResWd, &hDefault);
+			}
+			{
+				hResHtLbl = CreateWndLabel(hwnd, "Resolution height", 470, 200, 200, 20, IDC_RESHTLBL);
+				if(!hResHtLbl) return 0;
+				SetFont(&hResWdLbl, &hDefault);
+			}
+			{
+				hResHt = CreateWndCombo(hwnd, "", 470, 220, 200, 20, IDC_RESHT);
+				if(!hResHt) return 0;
+				SetFont(&hResHtLbl, &hDefault);
+			}
+			{
+				hUButton = CreateWndButton(hwnd, "Update", 10, 290, 60, 25, IDC_UPDBTN);
 				SetFont(&hUButton, &hDefault);
 			}
 			{
-				hDButton = CreateWndButton(hwnd, "Defaults", 80, 190, 60, 25, IDC_DEFBTN);
+				hDButton = CreateWndButton(hwnd, "Defaults", 80, 290, 60, 25, IDC_DEFBTN);
 				SetFont(&hDButton, &hDefault);
 			}
 			{
-				hLButton = CreateWndButton(hwnd, "Load File", 150, 190, 60, 25, IDC_LBTN);
+				hLButton = CreateWndButton(hwnd, "Load File", 150, 290, 60, 25, IDC_LBTN);
 				SetFont(&hLButton, &hDefault);
 			}
 			{
-				hFileGenBtn = CreateWndButton(hwnd, "Generate Configuration File", 510, 190, 160, 25, IDC_FILEGENBTN);
+				hFileGenBtn = CreateWndButton(hwnd, "Create Config File", 560, 290, 110, 25, IDC_FILEGENBTN);
 				SetFont(&hFileGenBtn, &hDefault);
 			}
 			{
@@ -857,8 +891,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				GetClientRect(hwnd, &rcClient);
 
-				iEditHeight = rcClient.bottom - 250;
-				SetWindowPos(hEdit, NULL, 0, 250, rcClient.right, iEditHeight, SWP_NOZORDER);
+				iEditHeight = rcClient.bottom - 350;
+				SetWindowPos(hEdit, NULL, 0, 350, rcClient.right, iEditHeight, SWP_NOZORDER);
 			}
 			break;
 		case WM_COMMAND:
@@ -1146,7 +1180,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				HBITMAP hbmOld = SelectObject(hdcMem, g_hbmBall);
 
 				GetObject(g_hbmBall, sizeof(bm), &bm);
-				BitBlt(hdc, 570, 10, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
+				BitBlt(hdc, 10, 7, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY);
 
 				SelectObject(hdcMem, hbmOld);
 				DeleteDC(hdcMem);
