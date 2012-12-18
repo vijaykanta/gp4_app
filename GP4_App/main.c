@@ -680,6 +680,14 @@ HWND hFileGenBtn;
 HWND hHTNLLbl, hResWdLbl, hResHtLbl;
 HWND hHTNL, hResWd, hResHt;
 
+/* Last set */
+HWND hBmpMpLbl, hExtStrLbl, hHtHzLbl;
+HWND hBmpMp, hExtStr, hHtHz;
+
+/* Others */
+HWND hWndMdLbl, hVsnLbl;
+HWND hWndMd, hVsn;
+
 HWND hUButton, hDButton, hLButton;
 CFG cfg;
 
@@ -837,7 +845,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hHTNL, &hDefault);
 			}
 			{
-				hResWdLbl = CreateWndLabel(hwnd, "Resolution width", 240, 200, 200, 20, IDC_RESWDLBL);
+				hResWdLbl = CreateWndLabel(hwnd, "Resolution Width", 240, 200, 200, 20, IDC_RESWDLBL);
 				if(!hResWdLbl) return 0;
 				SetFont(&hResWdLbl, &hDefault);
 			}
@@ -847,7 +855,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hResWd, &hDefault);
 			}
 			{
-				hResHtLbl = CreateWndLabel(hwnd, "Resolution height", 470, 200, 200, 20, IDC_RESHTLBL);
+				hResHtLbl = CreateWndLabel(hwnd, "Resolution Height", 470, 200, 200, 20, IDC_RESHTLBL);
 				if(!hResHtLbl) return 0;
 				SetFont(&hResWdLbl, &hDefault);
 			}
@@ -857,19 +865,68 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hResHtLbl, &hDefault);
 			}
 			{
-				hUButton = CreateWndButton(hwnd, "Update", 10, 290, 60, 25, IDC_UPDBTN);
+				hBmpMpLbl = CreateWndLabel(hwnd, "Bump Mapping", 10, 280, 200, 20, IDC_BMPMPLBL);
+				if(!hBmpMpLbl) return 0;
+				SetFont(&hBmpMpLbl, &hDefault);
+			}
+			{
+				hBmpMp = CreateWndCombo(hwnd, "", 10, 300, 200, 20, IDC_BMPMP);
+				if(!hBmpMp) return 0;
+				SetFont(&hBmpMp, &hDefault);
+			}
+			{
+				hExtStrLbl = CreateWndLabel(hwnd, "External Steering", 240, 280, 200, 20, IDC_EXTSTRLBL);
+				if(!hExtStrLbl) return 0;
+				SetFont(&hExtStrLbl, &hDefault);
+			}
+			{
+				hExtStr = CreateWndCombo(hwnd, "", 240, 300, 200, 20, IDC_EXTSTR);
+				if(!hExtStr) return 0;
+				SetFont(&hExtStr, &hDefault);
+			}
+			{
+				hHtHzLbl = CreateWndLabel(hwnd, "Heat Haze", 470, 280, 200, 20, IDC_HTHZLBL);
+				if(!hHtHzLbl) return 0;
+				SetFont(&hHtHzLbl, &hDefault);
+			}
+			{
+				hHtHz = CreateWndCombo(hwnd, "", 470, 300, 200, 20, IDC_HTHZ);
+				if(!hHtHz) return 0;
+				SetFont(&hHtHz, &hDefault);
+			}
+			{
+				hWndMdLbl = CreateWndLabel(hwnd, "Window", 250, 365, 100, 20, IDC_WNDMDLBL);
+				if(!hWndMdLbl) return 0;
+				SetFont(&hWndMdLbl, &hDefault);
+			}
+			{
+				hWndMd = CreateWndCombo(hwnd, "", 320, 363, 120, 20, IDC_WNDMD);
+				if(!hWndMd) return 0;
+				SetFont(&hWndMd, &hDefault);
+				SendMessage(hWndMd, CB_ADDSTRING, 0, (LPARAM) "Full Screen");
+				SendMessage(hWndMd, CB_SETCURSEL, 0, 0);
+			}
+			{
+				hVsn = CreateWndCombo(hwnd, "", 470, 363, 80, 20, IDC_VSN);
+				if(!hVsn) return 0;
+				SetFont(&hVsn, &hDefault);
+				SendMessage(hVsn, CB_ADDSTRING, 0, (LPARAM) "VSync Off");
+				SendMessage(hVsn, CB_SETCURSEL, 0, 0);
+			}
+			{
+				hUButton = CreateWndButton(hwnd, "Update", 10, 360, 60, 25, IDC_UPDBTN);
 				SetFont(&hUButton, &hDefault);
 			}
 			{
-				hDButton = CreateWndButton(hwnd, "Defaults", 80, 290, 60, 25, IDC_DEFBTN);
+				hDButton = CreateWndButton(hwnd, "Defaults", 80, 360, 60, 25, IDC_DEFBTN);
 				SetFont(&hDButton, &hDefault);
 			}
 			{
-				hLButton = CreateWndButton(hwnd, "Load File", 150, 290, 60, 25, IDC_LBTN);
+				hLButton = CreateWndButton(hwnd, "Load File", 150, 360, 60, 25, IDC_LBTN);
 				SetFont(&hLButton, &hDefault);
 			}
 			{
-				hFileGenBtn = CreateWndButton(hwnd, "Create Config File", 560, 290, 110, 25, IDC_FILEGENBTN);
+				hFileGenBtn = CreateWndButton(hwnd, "Create File", 590, 360, 80, 25, IDC_FILEGENBTN);
 				SetFont(&hFileGenBtn, &hDefault);
 			}
 			{
@@ -891,8 +948,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 				GetClientRect(hwnd, &rcClient);
 
-				iEditHeight = rcClient.bottom - 350;
-				SetWindowPos(hEdit, NULL, 0, 350, rcClient.right, iEditHeight, SWP_NOZORDER);
+				iEditHeight = rcClient.bottom - 400;
+				SetWindowPos(hEdit, NULL, 0, 400, rcClient.right, iEditHeight, SWP_NOZORDER);
 			}
 			break;
 		case WM_COMMAND:
@@ -1219,7 +1276,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	}
 
-	hwnd = CreateMainWnd(&hInstance, g_szClassName, "GP4 Graphics Configuration", 700, 650);
+	hwnd = CreateMainWnd(&hInstance, g_szClassName, "GP4 Graphics Configuration", 700, 710);
 
 	if(hwnd == NULL) {
 		//MessageBox(NULL, "Failed to create window!", "Error", MB_ICONEXCLAMATION | MB_OK);
