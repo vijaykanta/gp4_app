@@ -115,6 +115,18 @@ int texq = 0;
 int mxanfil = 1;
 int shdwt = 0;
 
+int hwtnl = 0;
+int reswd = 2;
+int resht = 2;
+int bmpmp = 0;
+int extstr = 1;
+int hthz = 0;
+int wndmd = 0;
+int vsn = 0;
+
+int reswds[] = { 1440, 1280, 1024, 800 };
+int reshts[] = { 900, 800, 768, 600 };
+
 HBITMAP g_hbmBall = NULL;
 
 char delimiters[] = " .,;|";
@@ -379,8 +391,63 @@ void init_vals(CFG *cfg) {
 	get_val_cmt_(cfg);
 	cfg->shdw_type_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
 	cfg->shdw_type = atoi(value);
-
 	strcpy(cfg->shdw_type_cmt, comment);
+
+	cfg->hw_tnl_key = 4;
+	cfg->cur_sel = cfg->hw_tnl_key;
+	get_val_cmt_(cfg);
+	cfg->hw_tnl_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->hw_tnl = atoi(value);
+	strcpy(cfg->hw_tnl_cmt, comment);
+
+	cfg->res_width_key = 1;
+	cfg->cur_sel = cfg->res_width_key;
+	get_val_cmt_(cfg);
+	cfg->res_width_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->res_width = atoi(value);
+	strcpy(cfg->res_width_cmt, comment);
+	
+	cfg->res_height_key = 2;
+	cfg->cur_sel = cfg->res_height_key;
+	get_val_cmt_(cfg);
+	cfg->res_height_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->res_height = atoi(value);
+	strcpy(cfg->res_height_cmt, comment);
+
+	cfg->bump_map_key = 38;
+	cfg->cur_sel = cfg->bump_map_key;
+	get_val_cmt_(cfg);
+	cfg->bump_map_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->bump_map = atoi(value);
+	strcpy(cfg->bump_map_cmt, comment);
+
+	cfg->ext_steer_key = 122;
+	cfg->cur_sel = cfg->ext_steer_key;
+	get_val_cmt_(cfg);
+	cfg->ext_steer_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->ext_steer = atoi(value);
+	strcpy(cfg->ext_steer_cmt, comment);
+
+	cfg->heat_haze_key = 127;
+	cfg->cur_sel = cfg->heat_haze_key;
+	get_val_cmt_(cfg);
+	cfg->heat_haze_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->heat_haze = atoi(value);
+	strcpy(cfg->heat_haze_cmt, comment);
+
+	cfg->wnd_mode_key = 5;
+	cfg->cur_sel = cfg->wnd_mode_key;
+	get_val_cmt_(cfg);
+	cfg->wnd_mode_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->wnd_mode = atoi(value);
+	strcpy(cfg->wnd_mode_cmt, comment);
+
+	cfg->vsync_key = 8;
+	cfg->cur_sel = cfg->vsync_key;
+	get_val_cmt_(cfg);
+	cfg->vsync_cmt = (char *) malloc(sizeof(char) * MAX_LEN);
+	cfg->vsync = atoi(value);
+	strcpy(cfg->vsync_cmt, comment);
 	//set_val_cmt_(cfg);
 	
 	/*printf("Initialized values from file..\n");
@@ -395,6 +462,14 @@ void free_vals(CFG *cfg) {
 	free(cfg->tex_qlty_cmt);
 	free(cfg->an_fil_qlty_cmt);
 	free(cfg->shdw_type_cmt);
+	free(cfg->hw_tnl_cmt);
+	free(cfg->res_width_cmt);
+	free(cfg->res_height_cmt);
+	free(cfg->bump_map_cmt);
+	free(cfg->ext_steer_cmt);
+	free(cfg->heat_haze_cmt);
+	free(cfg->wnd_mode_cmt);
+	free(cfg->vsync_cmt);
 }
 
 void read_file(CFG *cfg) {
@@ -550,7 +625,7 @@ HWND CreateMainWnd(HINSTANCE *hInstance, const char *className, char *wndName, i
 						className,
 						wndName,
 						WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX,
-						CW_USEDEFAULT, CW_USEDEFAULT, w, h,
+						100, 50, w, h,
 						NULL, NULL, *hInstance, NULL);
 	if(hwnd == NULL) {
 		MessageBox(NULL, "Failed to create main window!", "Error", MB_ICONEXCLAMATION | MB_OK);
@@ -691,6 +766,79 @@ HWND hWndMd, hVsn;
 HWND hUButton, hDButton, hLButton;
 CFG cfg;
 
+void SetResWd(CFG *cfg, int wd) {
+	switch(wd) {
+		case 1440:
+			SendMessage(hResWd, CB_SETCURSEL, 0, 0);
+			break;
+		case 1280:
+			SendMessage(hResWd, CB_SETCURSEL, 1, 0);
+			break;
+		case 1024:
+			SendMessage(hResWd, CB_SETCURSEL, 2, 0);
+			break;
+		case 800:
+			SendMessage(hResWd, CB_SETCURSEL, 3, 0);
+			break;
+		default:
+			SendMessage(hResWd, CB_SETCURSEL, 2, 0);
+			break;
+	}
+}
+
+void SetResHt(CFG *cfg, int ht) {
+	switch(ht) {
+		case 900:
+			SendMessage(hResHt, CB_SETCURSEL, 0, 0);
+			break;
+		case 800:
+			SendMessage(hResHt, CB_SETCURSEL, 1, 0);
+			break;
+		case 768:
+			SendMessage(hResHt, CB_SETCURSEL, 2, 0);
+			break;
+		case 600:
+			SendMessage(hResHt, CB_SETCURSEL, 3, 0);
+			break;
+		default:
+			SendMessage(hResHt, CB_SETCURSEL, 0, 0);
+			break;
+	}
+}
+
+void ResetToDefaults(CFG *cfg) {
+	texfilq = 0;
+	trkmp = 0;
+	envmp = 0;
+	texq = 0;
+	mxanfil = 1;
+	shdwt = 0;
+	hwtnl = 0;
+	reswd = 2;
+	resht = 2;
+	bmpmp = 0;
+	extstr = 1;
+	hthz = 0;
+	wndmd = 0;
+	vsn = 0;
+
+	SendMessage(hTexFilQ, CB_SETCURSEL, 0, 0);
+	SendMessage(hTrkMp, CB_SETCURSEL, 0, 0);
+	SendMessage(hEnvMp, CB_SETCURSEL, 0, 0);
+	SendMessage(hTexQ, CB_SETCURSEL, 0, 0);
+	SendMessage(hMxAnFil, CB_SETCURSEL, 1, 0);
+	SendMessage(hShdwT, CB_SETCURSEL, 0, 0);
+	SendMessage(hHTNL, CB_SETCURSEL, 0, 0);
+	SendMessage(hResWd, CB_SETCURSEL, 2, 0);
+	SendMessage(hResHt, CB_SETCURSEL, 2, 0);
+	SendMessage(hBmpMp, CB_SETCURSEL, 0, 0);
+	SendMessage(hExtStr, CB_SETCURSEL, 1, 0);
+	SendMessage(hHtHz, CB_SETCURSEL, 0, 0);
+	SendMessage(hWndMd, CB_SETCURSEL, 0, 0);
+	SendMessage(hVsn, CB_SETCURSEL, 0, 0);
+	update_buffer = 0;
+}
+
 void PreloadSettings(CFG *cfg) {
 	SendMessage(hTexFilQ, CB_SETCURSEL, cfg->tex_fil_qlty, 0);
 	texfilq = cfg->tex_fil_qlty;
@@ -704,22 +852,26 @@ void PreloadSettings(CFG *cfg) {
 	mxanfil = cfg->an_fil_qlty;
 	SendMessage(hShdwT, CB_SETCURSEL, cfg->shdw_type, 0);
 	shdwt = cfg->shdw_type;
-	update_buffer = 0;
-}
 
-void ResetToDefaults(CFG *cfg) {
-	texfilq = 0;
-	trkmp = 0;
-	envmp = 0;
-	texq = 0;
-	mxanfil = 1;
-	shdwt = 0;
-	SendMessage(hTexFilQ, CB_SETCURSEL, 0, 0);
-	SendMessage(hTrkMp, CB_SETCURSEL, 0, 0);
-	SendMessage(hEnvMp, CB_SETCURSEL, 0, 0);
-	SendMessage(hTexQ, CB_SETCURSEL, 0, 0);
-	SendMessage(hMxAnFil, CB_SETCURSEL, 0, 0);
-	SendMessage(hShdwT, CB_SETCURSEL, 0, 0);
+	SendMessage(hHTNL, CB_SETCURSEL, cfg->hw_tnl, 0);
+	hwtnl = cfg->hw_tnl;
+	SendMessage(hResWd, CB_SETCURSEL, cfg->res_width, 0);
+	SetResWd(cfg, cfg->res_width);
+	reswd = cfg->res_width;
+	SendMessage(hResHt, CB_SETCURSEL, cfg->res_height, 0);
+	SetResHt(cfg, cfg->res_height);
+	resht = cfg->res_height;
+	SendMessage(hBmpMp, CB_SETCURSEL, cfg->bump_map, 0);
+	bmpmp = cfg->bump_map;
+	SendMessage(hExtStr, CB_SETCURSEL, cfg->ext_steer, 0);
+	extstr = cfg->ext_steer;
+	SendMessage(hHtHz, CB_SETCURSEL, cfg->heat_haze, 0);
+	hthz = cfg->heat_haze;
+	
+	SendMessage(hWndMd, CB_SETCURSEL, cfg->wnd_mode, 0);
+	wndmd = cfg->wnd_mode;
+	SendMessage(hVsn, CB_SETCURSEL, cfg->vsync, 0);
+	vsn = cfg->vsync;
 	update_buffer = 0;
 }
 
@@ -757,7 +909,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hTexFilQ, CB_ADDSTRING, 3, (LPARAM) "Anisotropic");
 				SendMessage(hTexFilQ, CB_ADDSTRING, 4, (LPARAM) "Flat Cubic");
 				SendMessage(hTexFilQ, CB_ADDSTRING, 5, (LPARAM) "Gaussian Cubic");
-				SendMessage(hTexFilQ, CB_SETCURSEL, 0, 0);
+				SendMessage(hTexFilQ, CB_SETCURSEL, texfilq, 0);
 			}
 			{
 				hTrkMpLbl = CreateWndLabel(hwnd, "Track Map", 240, 40, 200, 20, IDC_TRKMPLBL);
@@ -771,7 +923,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hTrkMp, CB_ADDSTRING, 0, (LPARAM) "Off");
 				SendMessage(hTrkMp, CB_ADDSTRING, 1, (LPARAM) "Arcade Only");
 				SendMessage(hTrkMp, CB_ADDSTRING, 2, (LPARAM) "All non trackside");
-				SendMessage(hTrkMp, CB_SETCURSEL, 0, 0);
+				SendMessage(hTrkMp, CB_SETCURSEL, trkmp, 0);
 			}
 			{
 				hEnvMpLbl = CreateWndLabel(hwnd, "Environment Map", 470, 40, 200, 20, IDC_ENVMPLBL);
@@ -784,7 +936,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hEnvMp, &hDefault);
 				SendMessage(hEnvMp, CB_ADDSTRING, 0, (LPARAM) "Default");
 				SendMessage(hEnvMp, CB_ADDSTRING, 1, (LPARAM) "Extra");
-				SendMessage(hEnvMp, CB_SETCURSEL, 0, 0);
+				SendMessage(hEnvMp, CB_SETCURSEL, envmp, 0);
 			}
 			{
 				hTexQLbl = CreateWndLabel(hwnd, "Texture Quality", 10, 120, 200, 20, IDC_TEXQLBL);
@@ -799,7 +951,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hTexQ, CB_ADDSTRING, 2, (LPARAM) "HALF");
 				SendMessage(hTexQ, CB_ADDSTRING, 4, (LPARAM) "QTR");
 				SendMessage(hTexQ, CB_ADDSTRING, 8, (LPARAM) "EIGTH");
-				SendMessage(hTexQ, CB_SETCURSEL, 0, 0);
+				SendMessage(hTexQ, CB_SETCURSEL, texq, 0);
 			}
 			{
 				hMxAnFilLbl = CreateWndLabel(hwnd, "Max Anisotropic Filter (1-7)", 240, 120, 200, 20, IDC_MXANFILLBL);
@@ -817,7 +969,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hMxAnFil, CB_ADDSTRING, 5, (LPARAM) "5");
 				SendMessage(hMxAnFil, CB_ADDSTRING, 6, (LPARAM) "6");
 				SendMessage(hMxAnFil, CB_ADDSTRING, 7, (LPARAM) "7");
-				SendMessage(hMxAnFil, CB_SETCURSEL, 0, 0);
+				SendMessage(hMxAnFil, CB_SETCURSEL, mxanfil, 0);
 			}
 			{
 				hShdwTLbl = CreateWndLabel(hwnd, "Shadow Type", 470, 120, 200, 20, IDC_SHDWTLBL);
@@ -832,7 +984,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hShdwT, CB_ADDSTRING, 1, (LPARAM) "Static");
 				SendMessage(hShdwT, CB_ADDSTRING, 2, (LPARAM) "Composite");
 				SendMessage(hShdwT, CB_ADDSTRING, 3, (LPARAM) "Projected");
-				SendMessage(hShdwT, CB_SETCURSEL, 0, 0);
+				SendMessage(hShdwT, CB_SETCURSEL, shdwt, 0);
 			}
 			{
 				hHTNLLbl = CreateWndLabel(hwnd, "Hardware T&L", 10, 200, 200, 20, IDC_HTNLLBL);
@@ -840,9 +992,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hHTNLLbl, &hDefault);
 			}
 			{
-				hHTNL = CreateWndCombo(hwnd, "", 10, 220, 200, 20, IDC_HTNL);
+				hHTNL = CreateWndCombo(hwnd, "", 10, 220, 200, 500, IDC_HTNL);
 				if(!hHTNL) return 0;
 				SetFont(&hHTNL, &hDefault);
+				SendMessage(hHTNL, CB_ADDSTRING, 1, (LPARAM) "On");
+				SendMessage(hHTNL, CB_ADDSTRING, 0, (LPARAM) "Off");
+				SendMessage(hHTNL, CB_SETCURSEL, hwtnl, 0);
 			}
 			{
 				hResWdLbl = CreateWndLabel(hwnd, "Resolution Width", 240, 200, 200, 20, IDC_RESWDLBL);
@@ -850,19 +1005,30 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hResWdLbl, &hDefault);
 			}
 			{
-				hResWd = CreateWndCombo(hwnd, "", 240, 220, 200, 20, IDC_RESWD);
+				hResWd = CreateWndCombo(hwnd, "", 240, 220, 200, 500, IDC_RESWD);
 				if(!hResWd) return 0;
 				SetFont(&hResWd, &hDefault);
+				SendMessage(hResWd, CB_ADDSTRING, 0, (LPARAM) "1440");
+				SendMessage(hResWd, CB_ADDSTRING, 1, (LPARAM) "1280");
+				SendMessage(hResWd, CB_ADDSTRING, 2, (LPARAM) "1024");
+				SendMessage(hResWd, CB_ADDSTRING, 3, (LPARAM) "800");
+				SendMessage(hResWd, CB_SETCURSEL, reswd, 0);
+				
 			}
 			{
 				hResHtLbl = CreateWndLabel(hwnd, "Resolution Height", 470, 200, 200, 20, IDC_RESHTLBL);
 				if(!hResHtLbl) return 0;
-				SetFont(&hResWdLbl, &hDefault);
+				SetFont(&hResHtLbl, &hDefault);
 			}
 			{
-				hResHt = CreateWndCombo(hwnd, "", 470, 220, 200, 20, IDC_RESHT);
+				hResHt = CreateWndCombo(hwnd, "", 470, 220, 200, 500, IDC_RESHT);
 				if(!hResHt) return 0;
-				SetFont(&hResHtLbl, &hDefault);
+				SetFont(&hResHt, &hDefault);
+				SendMessage(hResHt, CB_ADDSTRING, 0, (LPARAM) "900");
+				SendMessage(hResHt, CB_ADDSTRING, 1, (LPARAM) "800");
+				SendMessage(hResHt, CB_ADDSTRING, 2, (LPARAM) "768");
+				SendMessage(hResHt, CB_ADDSTRING, 3, (LPARAM) "600");
+				SendMessage(hResHt, CB_SETCURSEL, resht, 0);
 			}
 			{
 				hBmpMpLbl = CreateWndLabel(hwnd, "Bump Mapping", 10, 280, 200, 20, IDC_BMPMPLBL);
@@ -870,9 +1036,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hBmpMpLbl, &hDefault);
 			}
 			{
-				hBmpMp = CreateWndCombo(hwnd, "", 10, 300, 200, 20, IDC_BMPMP);
+				hBmpMp = CreateWndCombo(hwnd, "", 10, 300, 200, 500, IDC_BMPMP);
 				if(!hBmpMp) return 0;
 				SetFont(&hBmpMp, &hDefault);
+				SendMessage(hBmpMp, CB_ADDSTRING, 0, (LPARAM) "Off");
+				SendMessage(hBmpMp, CB_ADDSTRING, 1, (LPARAM) "On");
+				SendMessage(hBmpMp, CB_SETCURSEL, bmpmp, 0);
 			}
 			{
 				hExtStrLbl = CreateWndLabel(hwnd, "External Steering", 240, 280, 200, 20, IDC_EXTSTRLBL);
@@ -880,9 +1049,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hExtStrLbl, &hDefault);
 			}
 			{
-				hExtStr = CreateWndCombo(hwnd, "", 240, 300, 200, 20, IDC_EXTSTR);
+				hExtStr = CreateWndCombo(hwnd, "", 240, 300, 200, 500, IDC_EXTSTR);
 				if(!hExtStr) return 0;
 				SetFont(&hExtStr, &hDefault);
+				SendMessage(hExtStr, CB_ADDSTRING, 0, (LPARAM) "Off");
+				SendMessage(hExtStr, CB_ADDSTRING, 1, (LPARAM) "On");
+				SendMessage(hExtStr, CB_SETCURSEL, extstr, 0);
 			}
 			{
 				hHtHzLbl = CreateWndLabel(hwnd, "Heat Haze", 470, 280, 200, 20, IDC_HTHZLBL);
@@ -890,9 +1062,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hHtHzLbl, &hDefault);
 			}
 			{
-				hHtHz = CreateWndCombo(hwnd, "", 470, 300, 200, 20, IDC_HTHZ);
+				hHtHz = CreateWndCombo(hwnd, "", 470, 300, 200, 500, IDC_HTHZ);
 				if(!hHtHz) return 0;
 				SetFont(&hHtHz, &hDefault);
+				SendMessage(hHtHz, CB_ADDSTRING, 0, (LPARAM) "Off");
+				SendMessage(hHtHz, CB_ADDSTRING, 1, (LPARAM) "On");
+				SendMessage(hHtHz, CB_SETCURSEL, hthz, 0);
 			}
 			{
 				hWndMdLbl = CreateWndLabel(hwnd, "Window", 250, 365, 100, 20, IDC_WNDMDLBL);
@@ -900,30 +1075,32 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SetFont(&hWndMdLbl, &hDefault);
 			}
 			{
-				hWndMd = CreateWndCombo(hwnd, "", 320, 363, 120, 20, IDC_WNDMD);
+				hWndMd = CreateWndCombo(hwnd, "", 320, 363, 120, 500, IDC_WNDMD);
 				if(!hWndMd) return 0;
 				SetFont(&hWndMd, &hDefault);
 				SendMessage(hWndMd, CB_ADDSTRING, 0, (LPARAM) "Full Screen");
-				SendMessage(hWndMd, CB_SETCURSEL, 0, 0);
+				SendMessage(hWndMd, CB_ADDSTRING, 1, (LPARAM) "Windowed");
+				SendMessage(hWndMd, CB_SETCURSEL, wndmd, 0);
 			}
 			{
-				hVsn = CreateWndCombo(hwnd, "", 470, 363, 80, 20, IDC_VSN);
+				hVsn = CreateWndCombo(hwnd, "", 470, 363, 80, 100, IDC_VSN);
 				if(!hVsn) return 0;
 				SetFont(&hVsn, &hDefault);
 				SendMessage(hVsn, CB_ADDSTRING, 0, (LPARAM) "VSync Off");
-				SendMessage(hVsn, CB_SETCURSEL, 0, 0);
+				SendMessage(hVsn, CB_ADDSTRING, 1, (LPARAM) "VSync On");
+				SendMessage(hVsn, CB_SETCURSEL, vsn, 0);
 			}
 			{
-				hUButton = CreateWndButton(hwnd, "Update", 10, 360, 60, 25, IDC_UPDBTN);
-				SetFont(&hUButton, &hDefault);
+				hLButton = CreateWndButton(hwnd, "Load File", 10, 360, 60, 25, IDC_LBTN);
+				SetFont(&hLButton, &hDefault);
 			}
 			{
 				hDButton = CreateWndButton(hwnd, "Defaults", 80, 360, 60, 25, IDC_DEFBTN);
 				SetFont(&hDButton, &hDefault);
 			}
 			{
-				hLButton = CreateWndButton(hwnd, "Load File", 150, 360, 60, 25, IDC_LBTN);
-				SetFont(&hLButton, &hDefault);
+				hUButton = CreateWndButton(hwnd, "Update", 150, 360, 60, 25, IDC_UPDBTN);
+				SetFont(&hUButton, &hDefault);
 			}
 			{
 				hFileGenBtn = CreateWndButton(hwnd, "Create File", 590, 360, 80, 25, IDC_FILEGENBTN);
@@ -1025,6 +1202,78 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						}
 					}
 					break;
+				case IDC_HTNL:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								hwtnl = SendMessage(hHTNL, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_RESWD:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								reswd = SendMessage(hResWd, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_RESHT:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								resht = SendMessage(hResHt, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_BMPMP:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								bmpmp = SendMessage(hBmpMp, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_EXTSTR:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								extstr = SendMessage(hExtStr, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_HTHZ:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								hthz = SendMessage(hHtHz, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_WNDMD:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								wndmd = SendMessage(hWndMd, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
+				case IDC_VSN:
+					{
+						switch(HIWORD(wParam)) {
+							case CBN_SELCHANGE:
+								vsn = SendMessage(hVsn, CB_GETCURSEL, 0, 0);
+								break;
+						}
+					}
+					break;
 				case IDC_DEFBTN:
 					{
 						ResetToDefaults(&cfg);
@@ -1095,76 +1344,165 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						GetDlgItemText(hwnd, IDC_TEXTURES, buf, 5);
 						MessageBox(hwnd, buf, "Notice", MB_OK);*/
 						
-						
-						cfg.tex_fil_qlty = texfilq;
-						cfg.cur_sel = cfg.tex_fil_qlty_key;
-						
-						if(file_read == 1) {
-							val = cfg.tex_fil_qlty;
-							free(comment);
-							comment = (char *) malloc(sizeof(char) * MAX_LINE);
-							strcpy(comment, cfg.tex_fil_qlty_cmt);
-							set_val_cmt_(&cfg);
+						if(update_buffer == 0) {
+							cfg.tex_fil_qlty = texfilq;
+							cfg.cur_sel = cfg.tex_fil_qlty_key;
+							
+							if(file_read == 1) {
+								val = cfg.tex_fil_qlty;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.tex_fil_qlty_cmt);
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.track_map = trkmp;
+							cfg.cur_sel = cfg.track_map_key;
+							if(file_read == 1) {
+								val = cfg.track_map;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.track_map_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.env_map = envmp;
+							cfg.cur_sel = cfg.env_map_key;
+							if(file_read == 1) {
+								val = cfg.env_map;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.env_map_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.tex_qlty = texq;
+							cfg.cur_sel = cfg.tex_qlty_key;
+
+							if(file_read == 1) {
+								val = cfg.tex_qlty;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.tex_fil_qlty_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.an_fil_qlty = mxanfil;
+							cfg.cur_sel = cfg.an_fil_qlty_key;
+							if(file_read == 1) {
+								val = cfg.an_fil_qlty;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.an_fil_qlty_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.shdw_type = shdwt;
+							cfg.cur_sel = cfg.shdw_type_key;
+							if(file_read == 1) {
+								val = cfg.shdw_type;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.shdw_type_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.hw_tnl = hwtnl;
+							cfg.cur_sel = cfg.hw_tnl_key;
+							if(file_read == 1) {
+								val = cfg.hw_tnl;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.hw_tnl_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.res_width = reswds[reswd];
+							cfg.cur_sel = cfg.res_width;
+							if(file_read == 1) {
+								val = cfg.res_width;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.res_width_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.res_height = reshts[resht];
+							cfg.cur_sel = cfg.res_height_key;
+							if(file_read == 1) {
+								val = cfg.res_height;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.res_height_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.bump_map = bmpmp;
+							cfg.cur_sel = cfg.bump_map_key;
+							if(file_read == 1) {
+								val = cfg.bump_map;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.bump_map_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.ext_steer = extstr;
+							cfg.cur_sel = cfg.ext_steer_key;
+							if(file_read == 1) {
+								val = cfg.ext_steer;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.ext_steer_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.heat_haze = hthz;
+							cfg.cur_sel = cfg.heat_haze_key;
+							if(file_read == 1) {
+								val = cfg.heat_haze;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.heat_haze_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.wnd_mode = wndmd;
+							cfg.cur_sel = cfg.wnd_mode_key;
+							if(file_read == 1) {
+								val = cfg.wnd_mode;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.wnd_mode_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							cfg.vsync = vsn;
+							cfg.cur_sel = cfg.vsync_key;
+							if(file_read == 1) {
+								val = cfg.vsync;
+								free(comment);
+								comment = (char *) malloc(sizeof(char) * MAX_LINE);
+								strcpy(comment, cfg.vsync_cmt);
+							
+								set_val_cmt_(&cfg);
+							}
+
+							update_buffer = 1;
+							MessageBox(hwnd, "New values updated to buffer..", "Notice", MB_ICONINFORMATION | MB_OK);
 						}
-
-						cfg.track_map = trkmp;
-						cfg.cur_sel = cfg.track_map_key;
-						if(file_read == 1) {
-							val = cfg.track_map;
-							free(comment);
-							comment = (char *) malloc(sizeof(char) * MAX_LINE);
-							strcpy(comment, cfg.track_map_cmt);
-						
-							set_val_cmt_(&cfg);
-						}
-
-						cfg.env_map = envmp;
-						cfg.cur_sel = cfg.env_map_key;
-						if(file_read == 1) {
-							val = cfg.env_map;
-							free(comment);
-							comment = (char *) malloc(sizeof(char) * MAX_LINE);
-							strcpy(comment, cfg.env_map_cmt);
-						
-							set_val_cmt_(&cfg);
-						}
-
-						cfg.tex_qlty = texq;
-						cfg.cur_sel = cfg.tex_qlty_key;
-
-						if(file_read == 1) {
-							val = cfg.tex_qlty;
-							free(comment);
-							comment = (char *) malloc(sizeof(char) * MAX_LINE);
-							strcpy(comment, cfg.tex_fil_qlty_cmt);
-						
-							set_val_cmt_(&cfg);
-						}
-
-						cfg.an_fil_qlty = mxanfil;
-						cfg.cur_sel = cfg.an_fil_qlty_key;
-						if(file_read == 1) {
-							val = cfg.an_fil_qlty;
-							free(comment);
-							comment = (char *) malloc(sizeof(char) * MAX_LINE);
-							strcpy(comment, cfg.an_fil_qlty_cmt);
-						
-							set_val_cmt_(&cfg);
-						}
-
-						cfg.shdw_type = shdwt;
-						cfg.cur_sel = cfg.shdw_type_key;
-						if(file_read == 1) {
-							val = cfg.shdw_type;
-							free(comment);
-							comment = (char *) malloc(sizeof(char) * MAX_LINE);
-							strcpy(comment, cfg.shdw_type_cmt);
-						
-							set_val_cmt_(&cfg);
-						}
-
-						update_buffer = 1;
-						MessageBox(hwnd, "New values updated to buffer..", "Notice", MB_ICONINFORMATION | MB_OK);
 					}
 					break;
 				case IDC_FILEGENBTN:
