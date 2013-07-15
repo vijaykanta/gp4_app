@@ -200,7 +200,7 @@ void get_val_cmt_(CFG *cfg) {
 		strip_tab(value, MAX_VAL);
 	}
 
-	token = strtok(NULL, ";");
+	token = strtok(NULL, "\n");
 
 	if(token != NULL) {
 		//comment[0] = '\0';
@@ -770,18 +770,23 @@ void SetResWd(CFG *cfg, int wd) {
 	switch(wd) {
 		case 1440:
 			SendMessage(hResWd, CB_SETCURSEL, 0, 0);
+			reswd = 0;
 			break;
 		case 1280:
 			SendMessage(hResWd, CB_SETCURSEL, 1, 0);
+			reswd = 1;
 			break;
 		case 1024:
 			SendMessage(hResWd, CB_SETCURSEL, 2, 0);
+			reswd = 2;
 			break;
 		case 800:
 			SendMessage(hResWd, CB_SETCURSEL, 3, 0);
+			reswd = 3;
 			break;
 		default:
 			SendMessage(hResWd, CB_SETCURSEL, 2, 0);
+			reswd = 2;
 			break;
 	}
 }
@@ -790,18 +795,23 @@ void SetResHt(CFG *cfg, int ht) {
 	switch(ht) {
 		case 900:
 			SendMessage(hResHt, CB_SETCURSEL, 0, 0);
+			resht = 0;
 			break;
 		case 800:
 			SendMessage(hResHt, CB_SETCURSEL, 1, 0);
+			resht = 1;
 			break;
 		case 768:
 			SendMessage(hResHt, CB_SETCURSEL, 2, 0);
+			resht = 2;
 			break;
 		case 600:
 			SendMessage(hResHt, CB_SETCURSEL, 3, 0);
+			resht = 3;
 			break;
 		default:
 			SendMessage(hResHt, CB_SETCURSEL, 0, 0);
+			resht = 2;
 			break;
 	}
 }
@@ -839,6 +849,25 @@ void ResetToDefaults(CFG *cfg) {
 	update_buffer = 0;
 }
 
+int LoadGameFile(CFG *cfg) {
+	char *buf;
+	buf = (char *) malloc(sizeof(char) * MAX_LEN);
+	memset(cfg->file_name, 0, sizeof(cfg->file_name));
+	strcpy(cfg->file_name, "C:\\Program Files\\Infogrames\\Grand Prix 4\\f1graphics.cfg");
+	cfg->fp = fopen(cfg->file_name, "r");
+	if(!cfg->fp) {
+		strcpy(cfg->file_name, "C:\\Program Files (x86)\\Infogrames\\Grand Prix 4\\f1graphics.cfg");
+		cfg->fp = fopen(cfg->file_name, "r");
+		if(!cfg->fp) {
+			printf("Error reading file!\n");
+			return 0;
+		}
+	}
+	sprintf(buf, "Loading from default location:\n%s", cfg->file_name);
+	MessageBox(NULL, buf, "Notice", MB_ICONINFORMATION | MB_OK);
+	return 1;
+}
+
 void PreloadSettings(CFG *cfg) {
 	SendMessage(hTexFilQ, CB_SETCURSEL, cfg->tex_fil_qlty, 0);
 	texfilq = cfg->tex_fil_qlty;
@@ -855,12 +884,10 @@ void PreloadSettings(CFG *cfg) {
 
 	SendMessage(hHTNL, CB_SETCURSEL, cfg->hw_tnl, 0);
 	hwtnl = cfg->hw_tnl;
-	SendMessage(hResWd, CB_SETCURSEL, cfg->res_width, 0);
+	//SendMessage(hResWd, CB_SETCURSEL, cfg->res_width, 0);
 	SetResWd(cfg, cfg->res_width);
-	reswd = cfg->res_width;
-	SendMessage(hResHt, CB_SETCURSEL, cfg->res_height, 0);
+	//SendMessage(hResHt, CB_SETCURSEL, cfg->res_height, 0);
 	SetResHt(cfg, cfg->res_height);
-	resht = cfg->res_height;
 	SendMessage(hBmpMp, CB_SETCURSEL, cfg->bump_map, 0);
 	bmpmp = cfg->bump_map;
 	SendMessage(hExtStr, CB_SETCURSEL, cfg->ext_steer, 0);
@@ -1013,7 +1040,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hResWd, CB_ADDSTRING, 2, (LPARAM) "1024");
 				SendMessage(hResWd, CB_ADDSTRING, 3, (LPARAM) "800");
 				SendMessage(hResWd, CB_SETCURSEL, reswd, 0);
-				
+				EnableWindow(hResWd, FALSE);
 			}
 			{
 				hResHtLbl = CreateWndLabel(hwnd, "Resolution Height", 470, 200, 200, 20, IDC_RESHTLBL);
@@ -1029,6 +1056,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				SendMessage(hResHt, CB_ADDSTRING, 2, (LPARAM) "768");
 				SendMessage(hResHt, CB_ADDSTRING, 3, (LPARAM) "600");
 				SendMessage(hResHt, CB_SETCURSEL, resht, 0);
+				EnableWindow(hResHt, FALSE);
 			}
 			{
 				hBmpMpLbl = CreateWndLabel(hwnd, "Bump Mapping", 10, 280, 200, 20, IDC_BMPMPLBL);
@@ -1110,6 +1138,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				hEdit = CreateWndEdit(hwnd, "", 0, 250, 100, 100, IDC_FEDIT);
 				SetFont(&hEdit, &hDefault);
 				EnableWindow(hEdit, FALSE);
+				//SendMessage(hEdit, EM_SETREADONLY, TRUE, NULL);
+			}
+			{
+				if(LoadGameFile(&cfg))
+					PreloadSettings(&cfg);
 			}
 			break;
 		case WM_SIZE:
@@ -1344,7 +1377,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 						GetDlgItemText(hwnd, IDC_TEXTURES, buf, 5);
 						MessageBox(hwnd, buf, "Notice", MB_OK);*/
 						
-						if(update_buffer == 0) {
+						//if(update_buffer == 0) {
 							cfg.tex_fil_qlty = texfilq;
 							cfg.cur_sel = cfg.tex_fil_qlty_key;
 							
@@ -1424,7 +1457,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 							}
 
 							cfg.res_width = reswds[reswd];
-							cfg.cur_sel = cfg.res_width;
+							cfg.cur_sel = cfg.res_width_key;
 							if(file_read == 1) {
 								val = cfg.res_width;
 								free(comment);
@@ -1502,7 +1535,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 							update_buffer = 1;
 							MessageBox(hwnd, "New values updated to buffer..", "Notice", MB_ICONINFORMATION | MB_OK);
-						}
+						//}
 					}
 					break;
 				case IDC_FILEGENBTN:
